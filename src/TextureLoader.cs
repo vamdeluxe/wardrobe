@@ -28,6 +28,7 @@ namespace VamDazzler
                 // Begin loading the texture
                 var img = new ImageLoaderThreaded.QueuedImage();
                 img.imgPath = textureFile;
+                img.createMipMaps = true;
                 img.callback = qimg => newState.applyTexture( qimg );
                 ImageLoaderThreaded.singleton.QueueImage( img );
             }
@@ -77,7 +78,7 @@ namespace VamDazzler
                     SuperController.LogError( "Error loading texture: " + tex.errorText );
                 }
                 else
-                { 
+                {
                     loadedTexture = tex.tex;
                     loadingCallback.Invoke( tex.tex );
                     loadingCallback = BLANK;
