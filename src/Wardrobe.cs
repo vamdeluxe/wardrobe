@@ -69,7 +69,7 @@ namespace VamDazzler
                 // Force reload
                 forceReloadButton = CreateButton( "Refresh Textures" );
                 forceReloadButton.button.onClick.AddListener( ForceReloadCallback );
-                
+
                 // Create a dump button
                 UIDynamic align = CreateSpacer( true );
                 align.height = 25;
@@ -149,7 +149,7 @@ namespace VamDazzler
                 disableUpdate = true;
             }
         }
-        
+
         //
         // UI action callbacks
 
@@ -221,12 +221,17 @@ namespace VamDazzler
             {
                 applyButton.button.interactable = true;
             }
+
+            if (clothingItems.val != null)
+            {
+                ApplyOutfitCallback();
+            }
         }
 
         public void DumpButtonCallback()
         {
             try
-            { 
+            {
                 // Obtain the currently selected clothes.
                 DAZClothingItem clothes = GameObject
                     .FindObjectsOfType< DAZClothingItem >()
@@ -237,7 +242,7 @@ namespace VamDazzler
 
                 // Bug out if it doesn't exist.
                 if( clothes == null )
-                { 
+                {
                     SuperController.LogError( $"Could not finding clothing item '{clothingItems.val}'" );
                     return;
                 }
@@ -256,11 +261,11 @@ namespace VamDazzler
                 SuperController.LogMessage( $"Could not export OBJ file for this clothing item: {ex}" );
             }
         }
-        
+
         private void ApplyOutfitCallback()
         {
             try
-            { 
+            {
                 if( clothingItems.val != null && outfitNames.val != null )
                     ApplyOutfit( clothingItems.val, outfitNames.val );
                 storedOutfits.setOutfit( clothingItems.val, outfitNames.val );
@@ -273,7 +278,7 @@ namespace VamDazzler
 
         private void ForceReloadCallback()
         {
-            try 
+            try
             {
                 string outfitName = storedOutfits.getOutfit( clothingItems.val );
                 string outfitDirectory = FindOutfitDirectory( clothingItems.val, outfitName );
@@ -282,7 +287,7 @@ namespace VamDazzler
                 textureLoader.ExpireDirectory( outfitDirectory );
 
                 if( outfitName != null )
-                { 
+                {
                     ApplyOutfit( clothingItems.val, outfitNames.val );
                 }
             }
@@ -307,9 +312,9 @@ namespace VamDazzler
                 .FirstOrDefault();
             if( clothes == null )
                 throw new Exception( "Tried to apply '{outfitName}' to '{forClothing}' but '{myPerson.name}' isn't wearing that." );
-            
+
             string[] files = SuperController.singleton.GetFilesAtPath( outfitDirectory );
-            
+
             foreach( Material mat in clothes
                 .GetComponentsInChildren< DAZSkinWrap >()
                 .SelectMany( dsw => dsw.GPUmaterials ) )
@@ -321,7 +326,7 @@ namespace VamDazzler
                 ApplyTexture( outfitDirectory, mat, PROP_GLOSS );
             }
         }
-        
+
         private void ExpireOutfitTextures( string forClothing, string outfitName )
         {
             string outfitDirectory = FindOutfitDirectory( forClothing, outfitName );
@@ -356,7 +361,7 @@ namespace VamDazzler
         private static IEnumerable< string > diffuseTexNames( Material mat )
         {
             if( mat.HasProperty( PROP_DIFFUSE ) )
-            { 
+            {
                 bool hasAlpha = mat.HasProperty( PROP_CUTOUT );
 
                 yield return $"{mat.name}D";
@@ -369,7 +374,7 @@ namespace VamDazzler
         private static IEnumerable< string > alphaTexNames( Material mat )
         {
             if( mat.HasProperty( PROP_CUTOUT ) )
-            { 
+            {
                 bool hasDiffuse = mat.HasProperty( PROP_DIFFUSE );
 
                 yield return $"{mat.name}A";
@@ -422,7 +427,7 @@ namespace VamDazzler
                 .Where( bn => bn.ToLower() != "psd" )
                 .Distinct( StringComparer.OrdinalIgnoreCase );
         }
-        
+
         private string FindOutfitDirectory( string forClothing, string outfitName )
         {
             string sceneDirectory = $"{SuperController.singleton.currentLoadDir}/Textures/Wardrobe/{forClothing}";
@@ -490,7 +495,7 @@ namespace VamDazzler
             {
                 entries = new Dictionary< string, string >();
                 if( ! jc.Keys.Contains( "version" ) || jc["version"].AsInt != 4 )
-                { 
+                {
                     // this is version 1, the undocumented
                     SuperController.LogError( "Cannot load Wardrobe v1 save. Everything has changed, sorry." );
                 }
@@ -508,7 +513,7 @@ namespace VamDazzler
                     entries[ obj["clothes" ] ] = obj[ "outfit" ];
                 }
             }
-            
+
             public override bool StoreJSON( JSONClass jc, bool includePhysical = true, bool includeAppearance = true, bool forceStore = false )
             {
                 var replacements = new JSONArray();
@@ -537,7 +542,7 @@ namespace VamDazzler
                 return new string[0];
             }
         }
-        
+
         // Get the basename (last part of a path, usually filename) from a fully qualified filename.
         private static string getBaseName( string fqfn )
         {
